@@ -1,0 +1,38 @@
+# kube-prometheus-stack settings for a small local cluster
+
+grafana:
+  service:
+    type: NodePort
+    nodePort: 30300
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      searchNamespace: ALL # pick up the SecureShip dashboard from the app namespace
+
+prometheus:
+  service:
+    type: NodePort
+    nodePort: 30090
+  prometheusSpec:
+    scrapeInterval: 15s
+    # discover ServiceMonitors / PrometheusRules from every namespace
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    retention: 2d
+
+alertmanager:
+  service:
+    type: NodePort
+    nodePort: 30093
+
+# control-plane components are not reachable in kind - avoid noisy false alerts
+kubeEtcd:
+  enabled: false
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false

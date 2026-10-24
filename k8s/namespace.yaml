@@ -1,0 +1,9 @@
+# Pod Security Admission: Kubernetes itself rejects any pod in this namespace
+# that runs as root, is privileged, or can escalate privileges.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: secureship
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted

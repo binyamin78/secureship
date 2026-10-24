@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate*
+terraform/.terraform.lock.hcl.bak
+terraform/kubeconfig

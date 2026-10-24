@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <form method="post" action="/notes">
+    <input name="author" placeholder="Your name" maxlength="40">
+    <textarea name="text" placeholder="What's your status today?" maxlength="280" required></textarea>
+    <button type="submit">Post</button>
+  </form>
+</div>
+{% for note in notes %}
+<div class="card">
+  <div>{{ note.text }}</div>
+  <div class="muted">{{ note.author }} &middot; {{ note.created_at }}</div>
+</div>
+{% endfor %}
+{% endblock %}

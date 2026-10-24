@@ -1,0 +1,91 @@
+# SecureShip - station 2: every push passes 4 security gates before an image is published.
+name: SecureShip CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  TRIVY_IMAGE: aquasec/trivy:0.69.3
+  GITLEAKS_IMAGE: zricethezav/gitleaks:v8.28.0
+
+jobs:
+  secrets:
+    name: "Gate 1 - Secrets scan (gitleaks)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # scan the whole git history, not only the last commit
+      - name: Scan for leaked passwords / keys
+        run: docker run --rm -v "$PWD:/repo" "$GITLEAKS_IMAGE" git /repo --redact --verbose
+
+  code:
+    name: "Gate 2 - Tests + code scan (pytest, Bandit)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - run: pip install -r app/requirements-dev.txt bandit
+      - name: Unit tests
+        working-directory: app
+        run: pytest -v
+      - name: Static code analysis (medium+ severity fails the build)
+        run: bandit -r app/devboard -ll
+
+  dependencies:
+    name: "Gate 3 - Dependency scan (pip-audit)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - run: pip install pip-audit
+      - name: Check libraries against the CVE database
+        run: pip-audit -r app/requirements.txt
+
+  image:
+    name: "Gate 4 - Build + image scan (Trivy) + publish"
+    needs: [secrets, code, dependencies]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set image name
+        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/secureship-devboard" >> "$GITHUB_ENV"
+      - name: Build image
+        run: docker build -t "$IMAGE:${GITHUB_SHA::7}" --build-arg APP_VERSION="${GITHUB_SHA::7}" app
+      - name: Scan image (HIGH/CRITICAL with a fix available fails the build)
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock "$TRIVY_IMAGE" \
+            image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "$IMAGE:${GITHUB_SHA::7}"
+      - name: Log in to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish image
+        if: github.event_name != 'pull_request'
+        run: |
+          docker tag "$IMAGE:${GITHUB_SHA::7}" "$IMAGE:main"
+          docker push "$IMAGE:${GITHUB_SHA::7}"
+          docker push "$IMAGE:main"
+          {
+            echo "### Image published"
+            echo '```'
+            echo "$IMAGE:${GITHUB_SHA::7}"
+            echo '```'
+            echo "Deploy it locally: \`./scripts/deploy.sh ${GITHUB_SHA::7}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

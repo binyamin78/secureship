@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: devboard
+  namespace: secureship
+  labels:
+    app: devboard
+spec:
+  type: NodePort
+  selector:
+    app: devboard
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      nodePort: 30080 # -> http://localhost:8080 (kind port mapping)

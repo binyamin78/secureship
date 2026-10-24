@@ -1,0 +1,39 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: devboard-alerts
+  namespace: secureship
+spec:
+  groups:
+    - name: devboard
+      rules:
+        - alert: DevBoardDown
+          expr: sum(up{namespace="secureship", service="devboard"}) == 0 or absent(up{namespace="secureship", service="devboard"})
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "DevBoard has no healthy pods"
+        - alert: DevBoardHighErrorRate
+          expr: |
+            sum(rate(devboard_http_requests_total{namespace="secureship", status=~"5.."}[2m]))
+              / sum(rate(devboard_http_requests_total{namespace="secureship"}[2m])) > 0.05
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "More than 5% of DevBoard requests fail"
+        - alert: DevBoardHighLatency
+          expr: |
+            histogram_quantile(0.95, sum by (le) (rate(devboard_http_request_duration_seconds_bucket{namespace="secureship"}[2m]))) > 0.5
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "DevBoard p95 latency is above 500ms"
+        - alert: DevBoardScaledUp
+          expr: kube_horizontalpodautoscaler_status_current_replicas{namespace="secureship", horizontalpodautoscaler="devboard"} > 2
+          labels:
+            severity: warning # "info" alerts are muted by default in kube-prometheus-stack
+          annotations:
+            summary: "HPA scaled DevBoard to {{ $value }} pods because of load"
