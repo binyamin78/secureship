@@ -57,11 +57,11 @@ git checkout main
 
 **2. תרחיש בונוס: סוד בקוד** (אם יש זמן, אותו רעיון)
 ```bash
-git checkout -b demo/leak
-echo 'AWS_SECRET_ACCESS_KEY = "q7Rk2vN9pXwT4mZ8sLc1Hy6Jb3Fd0GeUoAiQnVrK"' > app/config.py
-git add . && git commit -m "add config" && git push -u origin demo/leak
+./scripts/demo-leak.sh     # מייצר מפתח AWS מזויף ואקראי, דוחף ל-branch ופותח PR
 ```
 > ‏gitleaks בשער 1 נכשל: "leaks found: 1".
+>
+> 💡 **סיפור אמיתי להצגה:** בפעם הראשונה שדחפנו את הפרויקט, gitleaks **נכשל עלינו**: הוא מצא מפתח לדוגמה שכתבנו בתוך קובץ התיעוד הזה. הוצאנו את המפתח מהתיעוד, והוא נוצר עכשיו רק בזמן הדמו. את מה שכבר היה בהיסטוריה סימנו כ-false positive ב-`.gitleaksignore`, כי המפתח מזויף. (ראו שאלה 2 ב-qa.md: מפתח **אמיתי** היה צריך להחליף מיד.)
 
 **3. הדרך הנכונה: commit תקין עובר**
 מראים בלשונית Actions את הריצה האחרונה על `main`: כל 4 השערים ירוקים, ובסיכום "Image published" עם ה-SHA.

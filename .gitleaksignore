@@ -1,0 +1,4 @@
+# Reviewed false positives (fingerprint = commit:file:rule:line).
+# Fake AWS key used as an example in the first version of docs/demo-script.md - never a real credential.
+# The example was removed from the docs; scripts/demo-leak.sh now generates a random key at demo time.
+8ef34f54c7823f33f9fbccf5ebb1bb7c4e38836f:docs/demo-script.md:generic-api-key:61
