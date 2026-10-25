@@ -23,7 +23,9 @@ jobs:
         with:
           fetch-depth: 0 # scan the whole git history, not only the last commit
       - name: Scan for leaked passwords / keys
-        run: docker run --rm -v "$PWD:/repo" "$GITLEAKS_IMAGE" git /repo --redact --verbose
+        # --log-opts=HEAD: scan only this branch's history. Without it gitleaks scans every
+        # fetched branch, so one leaking PR would fail the pipeline for everybody.
+        run: docker run --rm -v "$PWD:/repo" "$GITLEAKS_IMAGE" git /repo --redact --verbose --log-opts=HEAD
 
   code:
     name: "Gate 2 - Tests + code scan (pytest, Bandit)"
