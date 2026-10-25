@@ -133,4 +133,5 @@ secureship/
 |---|---|---|
 | pip-audit | ‏Flask 3.1.2: ‏PYSEC-2026-2151 | עדכון ל-Flask 3.1.3 |
 | gitleaks | מפתח AWS **מזויף** שכתבנו כדוגמה בתוך קובץ התיעוד, בפוש הראשון | הוצאנו אותו מהתיעוד (נוצר רק בזמן דמו), והמופע בהיסטוריה סומן כ-false positive ב-`.gitleaksignore` |
+| gitleaks | סרק את **כל** ה-branches (`fetch-depth: 0`), כך ש-PR אחד עם סוד הכשיל גם את `main` | סריקה רק של היסטוריית ה-branch הנבדק: `--log-opts=HEAD` |
 | Trivy | 4 חולשות HIGH ב-pip ‏(msgpack, ‏urllib3) וב-setuptools בתוך ה-Image | הסרת pip/setuptools מה-Image הסופי. הסריקה עברה מ-4 ל-0 |

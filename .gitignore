@@ -7,3 +7,6 @@ terraform/.terraform/
 terraform/*.tfstate*
 terraform/.terraform.lock.hcl.bak
 terraform/kubeconfig
+
+# Presentation recordings (large, kept locally as offline backup)
+presentation/

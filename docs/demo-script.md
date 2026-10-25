@@ -128,3 +128,21 @@ kubectl -n secureship get pods -w
 ```bash
 ./scripts/down.sh
 ```
+
+---
+
+## 📊 תוצאות הדמו האמיתי (25.10.2026)
+
+> כל המספרים במצגת נמדדו בהרצה הזו. הסרטונים שמורים מקומית ב-`presentation/videos/` (לא ב-Git), לגיבוי בלי אינטרנט.
+
+| מה | תוצאה | איפה |
+|---|---|---|
+| PR #1: הורדה ל-Flask 3.1.2 | שער 3 (pip-audit) נכשל אחרי 21 שניות: `PYSEC-2026-2151`. שער 4 לא רץ. | [PR #1](https://github.com/binyamin78/secureship/pull/1) |
+| PR #2: מפתח AWS מזויף | שער 1 (gitleaks) נכשל אחרי 6 שניות: `leaks found: 1` | [PR #2](https://github.com/binyamin78/secureship/pull/2) |
+| ריצה על `main` | 4 שערים ירוקים, 54 שניות (12s / 10s / 17s / 32s) | Actions |
+| פריסה `deploy.sh b62999f` | 31 שניות, rolling update | `presentation/videos/deploy.webm` |
+| Pod של root | `Forbidden`, ‏4 הפרות של Pod Security | `k8s-defense.webm` |
+| עומס: 30 threads, ‏150 שניות | CPU שיא 207%, ‏HPA ביקש 6 Pods אחרי 32 שניות, ו-6 רצו אחרי 46 שניות. 2,170 בקשות, 0 שגיאות. ‏`DevBoardScaledUp` פעילה. | `hpa-scaling.webm` |
+| מחיקת כל ה-Pods | ראשון מוכן אחרי 3.5 שניות, שניים אחרי 6.6 שניות. בהרצה "קרה" (Image לא על השרת): 46.7 שניות. | `self-heal.webm` |
+
+**באג אמיתי שנמצא בזמן הדמו:** ‏gitleaks סרק את כל ה-branches, אז PR #2 הכשיל גם את `main`. תוקן ב-commit `b62999f` (`--log-opts=HEAD`).
